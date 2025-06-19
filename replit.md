@@ -2,7 +2,7 @@
 
 ## Overview
 
-ShopGuardian is a full-stack deception security platform designed to detect and log unauthorized access attempts by creating realistic fake retail interfaces. The application uses a dual-interface approach: a deception layer that mimics legitimate e-commerce platforms (like Walmart) to trap potential attackers, and an admin dashboard for monitoring security events in real-time.
+ShopGuardian is a comprehensive cybersecurity honeypot platform designed for the Walmart hackathon. It detects and traps sophisticated threats by creating an indistinguishable fake Walmart e-commerce site that captures attacker behavior in real-time. The system provides enterprise-grade threat intelligence, attack pattern analysis, and security monitoring capabilities specifically designed for retail cybersecurity scenarios.
 
 ## System Architecture
 
@@ -128,6 +128,16 @@ ShopGuardian is a full-stack deception security platform designed to detect and 
 - ✓ Comprehensive footer with multiple department links
 - ✓ Hero banners and promotional content mimicking real Walmart
 - ✓ Mobile-responsive design with authentic Walmart branding
+
+### Cybersecurity Dashboard Enhancement (June 19, 2025)
+- ✓ Advanced threat detection and classification system
+- ✓ Real-time security alerts with threat level indicators
+- ✓ Attack pattern analysis with visual threat distribution
+- ✓ Comprehensive threat intelligence reporting
+- ✓ Executive security assessment reports
+- ✓ Honeypot effectiveness metrics and containment rates
+- ✓ Multi-tab security dashboard (Live Threats, Analysis, Patterns, Intel)
+- ✓ Enhanced activity feed with threat severity classification
 
 ## Changelog
 
