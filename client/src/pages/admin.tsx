@@ -17,6 +17,17 @@ interface InteractionStats {
   formInteractions: number;
 }
 
+// Types for alerts and interactions
+interface SecurityAlert {
+  type: string;
+  message: string;
+  timestamp: number;
+}
+interface Interaction {
+  type: string;
+  [key: string]: any;
+}
+
 export default function AdminPage() {
   const [selectedTenant, setSelectedTenant] = useState<string>("default-tenant");
   const [alertCount, setAlertCount] = useState(0);
@@ -26,8 +37,14 @@ export default function AdminPage() {
     refetchInterval: 5000,
   });
 
-  const { data: interactions } = useQuery({
+  const { data: interactions = [] } = useQuery<Interaction[]>({
     queryKey: ['/api/interactions'],
+    refetchInterval: 3000,
+  });
+
+  // Fetch security alerts from backend
+  const { data: alerts = [] } = useQuery<SecurityAlert[]>({
+    queryKey: ['/api/alerts'],
     refetchInterval: 3000,
   });
 
@@ -47,23 +64,18 @@ export default function AdminPage() {
   // Calculate attack patterns from real data
   const getAttackPatterns = () => {
     if (!interactions) return [];
-    
-    const patterns = {};
-    interactions.forEach(interaction => {
+    const patterns: Record<string, { type: string; count: number; severity: string }> = {};
+    interactions.forEach((interaction: Interaction) => {
       const pattern = patterns[interaction.type] || { type: interaction.type, count: 0, severity: 'low' };
       pattern.count++;
-      
-      // Determine severity based on interaction type and frequency
       if (interaction.type === 'login_attempt' || interaction.type === 'login_failed') {
         pattern.severity = pattern.count > 3 ? 'high' : 'medium';
       } else if (interaction.type.includes('form_') || interaction.type === 'signup_attempt') {
         pattern.severity = pattern.count > 5 ? 'medium' : 'low';
       }
-      
       patterns[interaction.type] = pattern;
     });
-    
-    return Object.values(patterns).sort((a, b) => b.count - a.count);
+    return Object.values(patterns).sort((a, b) => (b.count as number) - (a.count as number));
   };
 
   // Calculate threat vectors
@@ -104,15 +116,18 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Security Alerts */}
-      {stats?.loginAttempts && stats.loginAttempts > 5 && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <strong>Security Alert:</strong> Detected {stats.loginAttempts} login attempts. 
-            Potential brute force attack in progress.
-          </AlertDescription>
-        </Alert>
+      {/* Security Alerts (from backend) */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          {alerts.map((alert, idx) => (
+            <Alert key={idx} className="border-red-200 bg-red-50">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800">
+                <strong>Security Alert:</strong> {alert.message} <span className="text-xs text-gray-500">({new Date(alert.timestamp).toLocaleTimeString()})</span>
+              </AlertDescription>
+            </Alert>
+          ))}
+        </div>
       )}
 
       {/* Cybersecurity Metrics */}

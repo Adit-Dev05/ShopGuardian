@@ -187,13 +187,13 @@ export default function WalmartHeader({
       </div>
 
       {/* Navigation menu */}
-      <div className="bg-walmart-blue text-white">
+      <div className="bg-walmart-blue">
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex items-center space-x-8 py-2">
             <div className="relative">
               <Button
                 variant="ghost"
-                className="text-white hover:bg-walmart-dark-blue flex items-center space-x-1"
+                className="text-black hover:bg-walmart-yellow hover:text-black flex items-center space-x-1"
                 onClick={() => {
                   setIsDepartmentsOpen(!isDepartmentsOpen);
                   handleNavClick('Departments');
@@ -226,7 +226,7 @@ export default function WalmartHeader({
             <div className="relative">
               <Button
                 variant="ghost"
-                className="text-white hover:bg-walmart-dark-blue"
+                className="text-black hover:bg-walmart-yellow hover:text-black"
                 onClick={() => {
                   setIsServicesOpen(!isServicesOpen);
                   handleNavClick('Services');
@@ -257,7 +257,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('Grocery', '/grocery')}
             >
               Grocery & Essentials
@@ -265,7 +265,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('Walmart+', '/plus')}
             >
               Walmart+
@@ -273,7 +273,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('Black Friday', '/black-friday')}
             >
               Black Friday Deals
@@ -281,7 +281,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('Fashion', '/fashion')}
             >
               Fashion
@@ -289,7 +289,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('Registry', '/registry')}
             >
               Registry
@@ -297,7 +297,7 @@ export default function WalmartHeader({
 
             <Button
               variant="ghost"
-              className="text-white hover:bg-walmart-dark-blue"
+              className="text-black hover:bg-walmart-yellow hover:text-black"
               onClick={() => handleNavClick('One Debit', '/debit')}
             >
               ONE Debit

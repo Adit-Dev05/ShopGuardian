@@ -1,0 +1,46 @@
+/* Walmart UI font import and base styles */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+body, .walmart-ui, .walmart-header, .walmart-main, .walmart-footer {
+  font-family: 'Rubik', Arial, sans-serif !important;
+}
+
+/* Walmart color palette for backgrounds, buttons, and accents */
+.walmart-blue-bg {
+  background-color: #0071dc !important;
+}
+.walmart-yellow-bg {
+  background-color: #ffc220 !important;
+}
+.walmart-blue-text {
+  color: #0071dc !important;
+}
+.walmart-yellow-text {
+  color: #ffc220 !important;
+}
+
+/* Button and card polish */
+.walmart-btn {
+  background: #0071dc;
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  transition: background 0.2s;
+}
+.walmart-btn:hover {
+  background: #005cb2;
+}
+
+.walmart-card {
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* Subtle hover for nav */
+.walmart-nav-link:hover {
+  background: #f3f4f6;
+  color: #0071dc;
+}

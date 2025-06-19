@@ -8,6 +8,28 @@ import { z } from "zod";
 // WebSocket clients for real-time updates
 const wsClients = new Set<any>();
 
+// In-memory alert store for prototype
+const alerts: { type: string; message: string; timestamp: number }[] = [];
+
+// Helper: Detect SQL injection patterns
+function isSQLInjection(str: string) {
+  const patterns = [
+    /('|\").*\s*or\s*('|\").*=('|\").*/i,
+    /union\s+select/i,
+    /drop\s+table/i,
+    /--/,
+    /;.*--/, 
+    /'\s*or\s*1=1/i,
+    /'\s*or\s*'1'='1/i
+  ];
+  return patterns.some((re) => re.test(str));
+}
+
+// Helper: Track failed login attempts per IP
+const failedLoginAttempts: Record<string, { count: number; last: number }> = {};
+const CREDENTIAL_STUFFING_THRESHOLD = 5; // e.g., 5 attempts in 30s
+const CREDENTIAL_STUFFING_WINDOW = 30 * 1000;
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create default tenant if none exists
   try {
@@ -49,11 +71,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Log interaction endpoint with WebSocket broadcast
   app.post("/api/interactions", async (req, res) => {
     try {
+      const ip = req.ip || req.connection.remoteAddress || 'unknown';
+      const { type, data } = req.body;
+      // Detect credential stuffing (rapid failed logins)
+      if (type === 'login_failed') {
+        const now = Date.now();
+        if (!failedLoginAttempts[ip]) failedLoginAttempts[ip] = { count: 0, last: now };
+        if (now - failedLoginAttempts[ip].last < CREDENTIAL_STUFFING_WINDOW) {
+          failedLoginAttempts[ip].count++;
+        } else {
+          failedLoginAttempts[ip].count = 1;
+        }
+        failedLoginAttempts[ip].last = now;
+        if (failedLoginAttempts[ip].count >= CREDENTIAL_STUFFING_THRESHOLD) {
+          alerts.push({
+            type: 'credential_stuffing',
+            message: `Possible credential stuffing attack from IP ${ip}`,
+            timestamp: now
+          });
+          failedLoginAttempts[ip].count = 0; // reset after alert
+        }
+      }
+      // Detect SQL injection in login attempts
+      if (type === 'login_attempt' && data) {
+        const fields = [data.email, data.username, data.password].filter(Boolean);
+        if (fields.some(isSQLInjection)) {
+          alerts.push({
+            type: 'sql_injection',
+            message: `Possible SQL injection attempt detected in login from IP ${ip}`,
+            timestamp: Date.now()
+          });
+        }
+      }
       const validatedData = insertInteractionSchema.parse({
         ...req.body,
-        ip: req.ip || req.connection.remoteAddress || 'unknown',
+        ip,
       });
-      
       const interaction = await storage.createInteraction(validatedData);
       
       // Broadcast to WebSocket clients
@@ -61,18 +114,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'new_interaction',
         data: interaction
       });
-      
       wsClients.forEach(client => {
-        if (client.readyState === 1) { // WebSocket.OPEN
+        if (client.readyState === 1) {
           client.send(message);
         }
       });
-      
       res.json(interaction);
     } catch (error) {
       console.error("Error creating interaction:", error);
       res.status(400).json({ error: "Invalid interaction data" });
     }
+  });
+
+  // Endpoint to get current alerts
+  app.get("/api/alerts", (req, res) => {
+    res.json(alerts.slice(-10)); // last 10 alerts
   });
 
   // Get recent interactions
