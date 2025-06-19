@@ -3,12 +3,26 @@ import WalmartHeader from "@/components/walmart-header";
 import FakeLogin from "@/components/fake-login";
 import WalmartSignup from "@/components/walmart-signup";
 import WalmartProducts from "@/components/walmart-products";
+import WalmartCart from "@/components/walmart-cart";
+import WalmartMyItems from "@/components/walmart-my-items";
 import { interactionLogger } from "@/lib/interaction-logger";
 
 export default function DeceptionPage() {
-  const [currentView, setCurrentView] = useState<'home' | 'signin' | 'signup'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'signin' | 'signup' | 'cart' | 'myitems' | 'reorder'>('home');
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [cartItems, setCartItems] = useState<string[]>([]);
+  
+  // Mock product prices for cart total calculation
+  const productPrices: Record<string, number> = {
+    '1': 1099.00,
+    '2': 498.00,
+    '3': 89.97,
+    '4': 199.99,
+    '5': 549.99,
+    '6': 279.95
+  };
+
+  const cartTotal = cartItems.reduce((sum, id) => sum + (productPrices[id] || 0), 0);
 
   const handleSignIn = () => {
     setCurrentView('signin');
@@ -43,14 +57,48 @@ export default function DeceptionPage() {
     }
   };
 
+  const handleRemoveFromCart = (productId: string) => {
+    setCartItems(prev => prev.filter(id => id !== productId));
+  };
+
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    // For simplicity, we're not tracking quantities separately
+    // In a real app, you'd have a more complex cart state
+    if (quantity === 0) {
+      handleRemoveFromCart(productId);
+    }
+  };
+
+  const handleViewCart = () => {
+    setCurrentView('cart');
+    interactionLogger.logNavigationClick('button', 'View Cart');
+  };
+
+  const handleViewMyItems = () => {
+    setCurrentView('myitems');
+    interactionLogger.logNavigationClick('button', 'View My Items');
+  };
+
+  const handleReorder = () => {
+    setCurrentView('reorder');
+    interactionLogger.logNavigationClick('button', 'Reorder');
+    alert('Reorder functionality: View your previous orders and quickly reorder items!');
+    setCurrentView('home');
+  };
+
   if (currentView === 'signin') {
     return (
       <div className="min-h-screen bg-gray-50">
         <WalmartHeader 
           onSignIn={handleSignIn}
           onCreateAccount={handleCreateAccount}
+          onBackToHome={handleBackToHome}
+          onViewCart={handleViewCart}
+          onViewMyItems={handleViewMyItems}
+          onReorder={handleReorder}
           isSignedIn={isSignedIn}
           cartCount={cartItems.length}
+          cartTotal={cartTotal}
         />
         <div className="py-12">
           <FakeLogin />
@@ -79,8 +127,13 @@ export default function DeceptionPage() {
         <WalmartHeader 
           onSignIn={handleSignIn}
           onCreateAccount={handleCreateAccount}
+          onBackToHome={handleBackToHome}
+          onViewCart={handleViewCart}
+          onViewMyItems={handleViewMyItems}
+          onReorder={handleReorder}
           isSignedIn={isSignedIn}
           cartCount={cartItems.length}
+          cartTotal={cartTotal}
         />
         <div className="py-12">
           <WalmartSignup 
@@ -100,13 +153,65 @@ export default function DeceptionPage() {
     );
   }
 
+  if (currentView === 'cart') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <WalmartHeader 
+          onSignIn={handleSignIn}
+          onCreateAccount={handleCreateAccount}
+          onBackToHome={handleBackToHome}
+          onViewCart={handleViewCart}
+          onViewMyItems={handleViewMyItems}
+          onReorder={handleReorder}
+          isSignedIn={isSignedIn}
+          cartCount={cartItems.length}
+          cartTotal={cartTotal}
+        />
+        <WalmartCart 
+          cartItems={cartItems}
+          onBack={handleBackToHome}
+          onRemoveItem={handleRemoveFromCart}
+          onUpdateQuantity={handleUpdateQuantity}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'myitems') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <WalmartHeader 
+          onSignIn={handleSignIn}
+          onCreateAccount={handleCreateAccount}
+          onBackToHome={handleBackToHome}
+          onViewCart={handleViewCart}
+          onViewMyItems={handleViewMyItems}
+          onReorder={handleReorder}
+          isSignedIn={isSignedIn}
+          cartCount={cartItems.length}
+          cartTotal={cartTotal}
+        />
+        <WalmartMyItems 
+          onBack={handleBackToHome}
+          onAddToCart={handleAddToCart}
+          cartItems={cartItems}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <WalmartHeader 
         onSignIn={handleSignIn}
         onCreateAccount={handleCreateAccount}
+        onBackToHome={handleBackToHome}
+        onViewCart={handleViewCart}
+        onViewMyItems={handleViewMyItems}
+        onReorder={handleReorder}
         isSignedIn={isSignedIn}
         cartCount={cartItems.length}
+        cartTotal={cartTotal}
       />
       
       {/* Hero banner */}

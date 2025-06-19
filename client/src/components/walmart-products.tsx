@@ -195,8 +195,22 @@ export default function WalmartProducts({ onAddToCart, cartItems }: WalmartProdu
             >
               {/* Product image */}
               <div className="relative">
-                <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Product Image</span>
+                <div className="w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
+                  <img 
+                    src={`https://picsum.photos/300/200?random=${product.id}`}
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    onError={(e) => {
+                      e.currentTarget.src = `data:image/svg+xml;base64,${btoa(`
+                        <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="100%" height="100%" fill="#f3f4f6"/>
+                          <text x="50%" y="50%" font-family="Arial" font-size="14" fill="#9ca3af" text-anchor="middle" dy=".3em">
+                            ${product.category}
+                          </text>
+                        </svg>
+                      `)}`;
+                    }}
+                  />
                 </div>
                 
                 {/* Badges */}

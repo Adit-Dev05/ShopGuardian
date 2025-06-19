@@ -8,18 +8,38 @@ import { interactionLogger } from "@/lib/interaction-logger";
 interface WalmartHeaderProps {
   onSignIn: () => void;
   onCreateAccount: () => void;
+  onBackToHome: () => void;
+  onViewCart: () => void;
+  onViewMyItems: () => void;
+  onReorder: () => void;
   isSignedIn: boolean;
   cartCount: number;
+  cartTotal: number;
 }
 
-export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, cartCount }: WalmartHeaderProps) {
+export default function WalmartHeader({ 
+  onSignIn, 
+  onCreateAccount, 
+  onBackToHome, 
+  onViewCart, 
+  onViewMyItems, 
+  onReorder, 
+  isSignedIn, 
+  cartCount, 
+  cartTotal 
+}: WalmartHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    interactionLogger.logInteraction('search_query', { query: searchQuery });
+    if (searchQuery.trim()) {
+      interactionLogger.logInteraction('search_query', { query: searchQuery });
+      // Simulate search results
+      alert(`Searching for "${searchQuery}"... Found 247 results!`);
+      setSearchQuery("");
+    }
   };
 
   const handleNavClick = (item: string, href?: string) => {
@@ -67,7 +87,10 @@ export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, c
             </button>
             <div 
               className="walmart-blue text-white px-3 py-2 rounded cursor-pointer"
-              onClick={() => handleNavClick('Walmart logo', '/')}
+              onClick={() => {
+                handleNavClick('Walmart logo', '/');
+                onBackToHome();
+              }}
             >
               <span className="text-xl font-bold">Walmart</span>
             </div>
@@ -98,7 +121,10 @@ export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, c
             <Button
               variant="ghost"
               className="flex items-center space-x-1"
-              onClick={() => handleNavClick('Reorder')}
+              onClick={() => {
+                handleNavClick('Reorder');
+                onReorder();
+              }}
             >
               <div className="flex flex-col items-center">
                 <div className="grid grid-cols-2 gap-1 w-4 h-4">
@@ -114,7 +140,10 @@ export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, c
             <Button
               variant="ghost"
               className="flex items-center space-x-1"
-              onClick={() => handleNavClick('My Items')}
+              onClick={() => {
+                handleNavClick('My Items');
+                onViewMyItems();
+              }}
             >
               <div className="flex flex-col items-center">
                 <Heart className="h-5 w-5" />
@@ -136,7 +165,10 @@ export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, c
             <Button
               variant="ghost"
               className="flex items-center space-x-1 relative"
-              onClick={() => handleNavClick('Shopping cart')}
+              onClick={() => {
+                handleNavClick('Shopping cart');
+                onViewCart();
+              }}
             >
               <div className="flex flex-col items-center">
                 <div className="relative">
@@ -147,7 +179,7 @@ export default function WalmartHeader({ onSignIn, onCreateAccount, isSignedIn, c
                     </Badge>
                   )}
                 </div>
-                <span className="text-xs">${(cartCount * 23.99).toFixed(2)}</span>
+                <span className="text-xs">${cartTotal.toFixed(2)}</span>
               </div>
             </Button>
           </div>
