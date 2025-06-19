@@ -20,14 +20,7 @@ function Router() {
     <div className="min-h-screen bg-gray-50">
       <Navigation currentView={currentView} onViewChange={setCurrentView} />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <Switch>
-          <Route path="/" component={DeceptionPage} />
-          <Route path="/deception" component={DeceptionPage} />
-          <Route path="/admin" component={AdminPage} />
-          <Route component={NotFound} />
-        </Switch>
-        
-        {/* Show current view content */}
+        {/* Show current view content based on navigation state */}
         {currentView === 'deception' ? <DeceptionPage /> : <AdminPage />}
       </main>
     </div>
