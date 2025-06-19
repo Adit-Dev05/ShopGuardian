@@ -91,11 +91,39 @@ ShopGuardian is a full-stack deception security platform designed to detect and 
 - **Environment Variables**: DATABASE_URL for connection string
 - **Development Workflow**: `npm run db:push` for schema synchronization
 
+## Recent Changes
+
+### Database Integration (June 19, 2025)
+- ✓ Migrated from in-memory storage to PostgreSQL database
+- ✓ Enhanced schema with multi-tenant support
+- ✓ Added risk scoring and geographic tracking
+- ✓ Implemented advanced analytics tables
+
+### Real-time Features (June 19, 2025)
+- ✓ WebSocket integration for live monitoring
+- ✓ Real-time interaction broadcasting
+- ✓ Auto-reconnection for reliable connections
+- ✓ Live dashboard updates without page refresh
+
+### Advanced Analytics (June 19, 2025)
+- ✓ Risk analysis with threat scoring
+- ✓ Geographic distribution analytics
+- ✓ Suspicious pattern detection
+- ✓ High-risk IP identification
+- ✓ Interactive analytics dashboard
+
+### Multi-tenant Architecture (June 19, 2025)
+- ✓ Tenant management system
+- ✓ Organization-based data isolation
+- ✓ Tenant selector interface
+- ✓ Default tenant auto-creation
+
 ## Changelog
 
 ```
 Changelog:
-- June 19, 2025. Initial setup
+- June 19, 2025: Enhanced with PostgreSQL, WebSockets, advanced analytics, and multi-tenant support
+- June 19, 2025: Initial setup with basic deception interface
 ```
 
 ## User Preferences

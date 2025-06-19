@@ -8,9 +8,13 @@ import Navigation from "@/components/navigation";
 import DeceptionPage from "@/pages/deception";
 import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
+import { useWebSocket } from "@/hooks/use-websocket";
 
 function Router() {
   const [currentView, setCurrentView] = useState<'deception' | 'admin'>('deception');
+  
+  // Initialize WebSocket connection
+  useWebSocket();
 
   return (
     <div className="min-h-screen bg-gray-50">
