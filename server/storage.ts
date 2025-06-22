@@ -365,9 +365,13 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   private calculateOverallThreatScore(interactions: Interaction[]): number {
-    const totalRisk = interactions.reduce((sum, i) => sum + (i.riskScore || 0), 0);
-    const avgRisk = totalRisk / Math.max(interactions.length, 1);
-    return Math.min(avgRisk * 10, 100); // Scale to 0-100
+    // Use only the last 50 interactions for threat score calculation
+    const recent = interactions.slice(-50);
+    const totalRisk = recent.reduce((sum, i) => sum + (i.riskScore || 0), 0);
+    const avgRisk = totalRisk / Math.max(recent.length, 1);
+    // Use a logarithmic scale to avoid sudden jumps
+    const logScore = Math.log10(avgRisk + 1) * 40; // log10(1) = 0, log10(11) ~ 1, log10(101) ~ 2
+    return Math.min(Math.round(logScore), 100);
   }
 
   private detectSuspiciousLocations(interactions: Interaction[]): any[] {

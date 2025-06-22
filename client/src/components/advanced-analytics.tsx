@@ -24,7 +24,7 @@ interface GeoAnalytics {
 export default function AdvancedAnalytics() {
   const { data: riskData, isLoading: riskLoading } = useQuery<RiskAnalysis>({
     queryKey: ['/api/analytics/risk'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 2000, // Refresh every 2 seconds for real-time updates
   });
 
   const { data: geoData, isLoading: geoLoading } = useQuery<GeoAnalytics>({

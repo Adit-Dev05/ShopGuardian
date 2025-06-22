@@ -3,6 +3,7 @@ import time
 
 # Target endpoint
 URL = "http://localhost:5002/api/interactions"
+USER_AGENT = "ShopGuardianAttackDemo/1.0 (Python)"
 
 # --- Credential Stuffing Simulation ---
 usernames = ["admin", "user", "test", "guest", "demo"]
@@ -15,7 +16,9 @@ for i in range(len(usernames)):
         "data": {
             "username": usernames[i],
             "password": passwords[i]
-        }
+        },
+        "userAgent": USER_AGENT,
+        "url": "/deception/login"
     }
     response = requests.post(URL, json=payload)
     print(f"[{i+1}] Attempted login with {usernames[i]}/{passwords[i]} → {response.status_code}")
@@ -37,7 +40,9 @@ for i, injection in enumerate(sql_payloads):
         "data": {
             "username": injection,
             "password": "anything"
-        }
+        },
+        "userAgent": USER_AGENT,
+        "url": "/deception/login"
     }
     response = requests.post(URL, json=payload)
     print(f"[{i+1}] Sent SQL injection: {injection} → {response.status_code}")
