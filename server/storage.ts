@@ -181,7 +181,7 @@ export class PostgreSQLStorage implements IStorage {
         lte(interactions.timestamp, endDate)
       ));
 
-    const uniqueIPs = new Set(interactionsInPeriod.map(i => i.ip).filter(ip => ip !== null));
+    const uniqueIPs = new Set(interactionsInPeriod.map((i: Interaction) => i.ip).filter((ip: string | null) => ip !== null));
     const reportData = {
       totalInteractions: interactionsInPeriod.length,
       uniqueIPs: uniqueIPs.size,
@@ -222,7 +222,7 @@ export class PostgreSQLStorage implements IStorage {
     const ipRiskMap = new Map<string, number>();
 
     // Calculate risk scores per IP
-    allInteractions.forEach(interaction => {
+    allInteractions.forEach((interaction: Interaction) => {
       if (interaction.ip && interaction.riskScore) {
         const currentRisk = ipRiskMap.get(interaction.ip) || 0;
         ipRiskMap.set(interaction.ip, currentRisk + interaction.riskScore);
@@ -255,7 +255,7 @@ export class PostgreSQLStorage implements IStorage {
     const allInteractions = await query;
     const countryMap = new Map<string, number>();
 
-    allInteractions.forEach(interaction => {
+    allInteractions.forEach((interaction: Interaction) => {
       if (interaction.geoLocation) {
         const geoData = interaction.geoLocation as any;
         const country = geoData.country || 'Unknown';
@@ -293,7 +293,7 @@ export class PostgreSQLStorage implements IStorage {
 
   private getTopInteractionTypes(interactions: Interaction[]): { type: string; count: number }[] {
     const typeMap = new Map<string, number>();
-    interactions.forEach(i => {
+    interactions.forEach((i: Interaction) => {
       typeMap.set(i.type, (typeMap.get(i.type) || 0) + 1);
     });
     
@@ -305,7 +305,7 @@ export class PostgreSQLStorage implements IStorage {
   private getRiskDistribution(interactions: Interaction[]): { low: number; medium: number; high: number } {
     const distribution = { low: 0, medium: 0, high: 0 };
     
-    interactions.forEach(i => {
+    interactions.forEach((i: Interaction) => {
       const risk = i.riskScore || 0;
       if (risk < 3) distribution.low++;
       else if (risk < 7) distribution.medium++;
@@ -318,7 +318,7 @@ export class PostgreSQLStorage implements IStorage {
   private getHourlyActivity(interactions: Interaction[]): { hour: number; count: number }[] {
     const hourMap = new Map<number, number>();
     
-    interactions.forEach(i => {
+    interactions.forEach((i: Interaction) => {
       const hour = new Date(i.timestamp).getHours();
       hourMap.set(hour, (hourMap.get(hour) || 0) + 1);
     });
@@ -343,7 +343,7 @@ export class PostgreSQLStorage implements IStorage {
     
     // Pattern 1: Rapid fire interactions from same IP
     const ipActivityMap = new Map<string, Interaction[]>();
-    interactions.forEach(i => {
+    interactions.forEach((i: Interaction) => {
       if (i.ip) {
         if (!ipActivityMap.has(i.ip)) ipActivityMap.set(i.ip, []);
         ipActivityMap.get(i.ip)!.push(i);
@@ -365,13 +365,9 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   private calculateOverallThreatScore(interactions: Interaction[]): number {
-    // Use only the last 50 interactions for threat score calculation
-    const recent = interactions.slice(-50);
-    const totalRisk = recent.reduce((sum, i) => sum + (i.riskScore || 0), 0);
-    const avgRisk = totalRisk / Math.max(recent.length, 1);
-    // Use a logarithmic scale to avoid sudden jumps
-    const logScore = Math.log10(avgRisk + 1) * 40; // log10(1) = 0, log10(11) ~ 1, log10(101) ~ 2
-    return Math.min(Math.round(logScore), 100);
+    const totalRisk = interactions.reduce((sum, i) => sum + (i.riskScore || 0), 0);
+    const avgRisk = totalRisk / Math.max(interactions.length, 1);
+    return Math.min(avgRisk * 10, 100); // Scale to 0-100
   }
 
   private detectSuspiciousLocations(interactions: Interaction[]): any[] {
@@ -413,7 +409,7 @@ export class HybridStorage implements IStorage {
       return {
         id: 'default-tenant',
         name: tenant.name,
-        domain: tenant.domain,
+        domain: tenant.domain ?? null,
         settings: tenant.settings,
         isActive: tenant.isActive ?? true,
         createdAt: new Date()
@@ -487,7 +483,7 @@ export class HybridStorage implements IStorage {
     try {
       return await this.tryPostgreSQL(() => this.pgStorage.getInteractions(tenantId, limit));
     } catch (error) {
-      return await this.memStorage.getInteractions(limit);
+      return await this.memStorage.getInteractions(tenantId, limit);
     }
   }
 
@@ -591,7 +587,7 @@ export class MemStorage implements IStorage {
     return {
       id: 'default-tenant',
       name: tenant.name,
-      domain: tenant.domain,
+      domain: tenant.domain ?? null,
       settings: tenant.settings,
       isActive: tenant.isActive ?? true,
       createdAt: new Date()
@@ -654,13 +650,20 @@ export class MemStorage implements IStorage {
       riskScore: this.calculateRiskScore(insertInteraction),
       geoLocation: insertInteraction.geoLocation || null,
       fingerprint: insertInteraction.fingerprint || null,
+      userAgent: (insertInteraction as any).userAgent ?? null,
+      url: (insertInteraction as any).url ?? null,
+      ip: (insertInteraction as any).ip ?? null,
+      sessionId: (insertInteraction as any).sessionId ?? null,
     };
     this.interactions.set(id, interaction);
     return interaction;
   }
 
-  async getInteractions(limit: number = 50): Promise<Interaction[]> {
-    const allInteractions = Array.from(this.interactions.values());
+  async getInteractions(tenantId?: string, limit: number = 50): Promise<Interaction[]> {
+    let allInteractions = Array.from(this.interactions.values());
+    if (tenantId) {
+      allInteractions = allInteractions.filter(i => i.tenantId === tenantId);
+    }
     return allInteractions
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
